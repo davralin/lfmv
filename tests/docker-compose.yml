@@ -1,0 +1,16 @@
+services:
+  lidarr:
+    image: ghcr.io/home-operations/lidarr:3.1.2.4938@sha256:9df1e14c8e09745f23a36c0cc6adcf69665b379aae60e5a7cb9bda27961ef4e7
+    ports:
+      - "8686:8686"
+    environment:
+      # API key injected at runtime — no need to scrape config.xml
+      # Must be 20+ characters (Lidarr enforces this)
+      LIDARR__AUTH__APIKEY: lfmvtestkey1234567890
+    # No volumes — fully ephemeral, data is discarded after tests
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8686/ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
