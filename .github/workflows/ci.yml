@@ -110,6 +110,7 @@ jobs:
           image-ref: ${{ steps.image-ref.outputs.ref }}
           severity: CRITICAL,HIGH
           ignore-unfixed: true
+          scanners: vuln
           exit-code: '1'
           format: sarif
           output: trivy-image.sarif
