@@ -3,7 +3,7 @@
 # Single-shot container: runs the pipeline once and exits.
 # Schedule externally via kubernetes CronJob or host cron with `docker run`.
 
-FROM python:3.13.5-slim@sha256:4c2cf9917bd1cbacc5e9b07320025bdb7cdf2df7b0ceaccb55e9dd7e30987419 AS base
+FROM python:3.14.6-slim@sha256:b877e50bd90de10af8d82c57a022fc2e0dc731c5320d762a27986facfc3355c1 AS base
 
 # ffmpeg is required by yt-dlp to mux audio+video streams
 RUN apt-get update \
