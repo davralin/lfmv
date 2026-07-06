@@ -1,4 +1,5 @@
 """Unit tests for Config.from_env()."""
+
 from __future__ import annotations
 
 import pytest
@@ -14,8 +15,15 @@ def test_raises_when_api_key_missing(monkeypatch):
 
 def test_defaults(monkeypatch):
     monkeypatch.setenv("LIDARR_API_KEY", "testkey")
-    for var in ["LIDARR_URL", "OUTPUT_DIR", "OUTPUT_TEMPLATE", "YTDLP_FORMAT",
-                "MUSICBRAINZ_URL", "MUSICBRAINZ_RATE_LIMIT", "LOG_LEVEL"]:
+    for var in [
+        "LIDARR_URL",
+        "OUTPUT_DIR",
+        "OUTPUT_TEMPLATE",
+        "YTDLP_FORMAT",
+        "MUSICBRAINZ_URL",
+        "MUSICBRAINZ_RATE_LIMIT",
+        "LOG_LEVEL",
+    ]:
         monkeypatch.delenv(var, raising=False)
 
     cfg = Config.from_env()

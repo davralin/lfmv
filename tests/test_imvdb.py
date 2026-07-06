@@ -1,4 +1,5 @@
 """Unit tests for IMVDb HTML parsing (no network required)."""
+
 from __future__ import annotations
 
 from pathlib import Path

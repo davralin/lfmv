@@ -76,13 +76,17 @@ def _add_test_artist() -> dict:
     artist_data = results[0]
 
     # Fetch default quality and metadata profile IDs
-    quality_profile_id = httpx.get(
-        f"{LIDARR_URL}/api/v1/qualityprofile", headers=headers, timeout=10
-    ).raise_for_status().json()[0]["id"]
+    quality_profile_id = (
+        httpx.get(f"{LIDARR_URL}/api/v1/qualityprofile", headers=headers, timeout=10)
+        .raise_for_status()
+        .json()[0]["id"]
+    )
 
-    metadata_profile_id = httpx.get(
-        f"{LIDARR_URL}/api/v1/metadataprofile", headers=headers, timeout=10
-    ).raise_for_status().json()[0]["id"]
+    metadata_profile_id = (
+        httpx.get(f"{LIDARR_URL}/api/v1/metadataprofile", headers=headers, timeout=10)
+        .raise_for_status()
+        .json()[0]["id"]
+    )
 
     artist_data["rootFolderPath"] = "/music"
     artist_data["qualityProfileId"] = quality_profile_id

@@ -32,6 +32,7 @@ from tests.constants import (
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _make_config(lidarr_fixture: dict, tmp_path) -> Config:
     """Build a Config pointing at the test Lidarr instance."""
     os.environ["LIDARR_API_KEY"] = lidarr_fixture["api_key"]
@@ -43,6 +44,7 @@ def _make_config(lidarr_fixture: dict, tmp_path) -> Config:
 # ---------------------------------------------------------------------------
 # Stage 1: Lidarr
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.integration
 def test_lidarr_fetch_returns_artists(lidarr):
@@ -72,6 +74,7 @@ def test_lidarr_artist_has_mbid(lidarr):
 # Stage 2: MusicBrainz  (does not require the Lidarr fixture)
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.integration
 def test_musicbrainz_resolves_imvdb_slug():
     """OK Go's MBID resolves to the expected IMVDb slug via MusicBrainz."""
@@ -100,6 +103,7 @@ def test_musicbrainz_unknown_mbid_returns_none():
 # Stage 3: IMVDb  (does not require Lidarr)
 # ---------------------------------------------------------------------------
 
+
 @pytest.mark.integration
 def test_imvdb_artist_page_returns_videos():
     """Scraping OK Go's IMVDb page returns at least one video URL."""
@@ -107,9 +111,7 @@ def test_imvdb_artist_page_returns_videos():
 
     assert len(video_urls) >= 1, "Expected at least one video URL from IMVDb"
     for url in video_urls:
-        assert url.startswith("https://imvdb.com/video/"), (
-            f"Unexpected URL format: {url!r}"
-        )
+        assert url.startswith("https://imvdb.com/video/"), f"Unexpected URL format: {url!r}"
 
 
 @pytest.mark.integration
@@ -135,6 +137,7 @@ def test_imvdb_unknown_slug_returns_empty():
 # ---------------------------------------------------------------------------
 # Stage 4: Full pipeline dry-run
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.integration
 def test_full_pipeline_dry_run(lidarr, tmp_path):
