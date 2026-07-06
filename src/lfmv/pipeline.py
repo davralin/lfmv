@@ -4,9 +4,8 @@ from __future__ import annotations
 
 import structlog
 
-from lfmv import __version__
+from lfmv import __version__, downloader, imvdb, lidarr, musicbrainz
 from lfmv.config import Config
-from lfmv import downloader, imvdb, lidarr, musicbrainz
 
 log = structlog.get_logger(__name__)
 

@@ -8,9 +8,8 @@ import sys
 import click
 import structlog
 
-from lfmv import __version__
+from lfmv import __version__, pipeline
 from lfmv.config import Config
-from lfmv import pipeline
 
 
 def _configure_logging(level: str) -> None:

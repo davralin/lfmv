@@ -47,7 +47,7 @@ class Config:
     log_level: str
 
     @classmethod
-    def from_env(cls) -> "Config":
+    def from_env(cls) -> Config:
         return cls(
             lidarr_url=_optional("LIDARR_URL", "http://localhost:8686").rstrip("/"),
             lidarr_api_key=_require("LIDARR_API_KEY"),

@@ -3,8 +3,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
-
 from lfmv.imvdb import _parse_video_info, _parse_video_page_urls
 
 FIXTURES = Path(__file__).parent / "fixtures"

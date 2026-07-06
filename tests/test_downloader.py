@@ -4,8 +4,6 @@ from __future__ import annotations
 from pathlib import Path
 from unittest.mock import patch
 
-import pytest
-
 from lfmv.config import Config
 from lfmv.downloader import _sanitize, download_video
 
