@@ -3,7 +3,7 @@
 ## CI / GitHub Actions
 
 ### SHA pinning
-All third-party actions in `.github/workflows/ci.yml` must be pinned to a commit
+All third-party actions in all workflows must be pinned to a commit
 SHA with a version comment:
 
 ```yaml
@@ -38,6 +38,23 @@ registry digest via `outputs.digest`.
 `severity: CRITICAL,HIGH`, `ignore-unfixed: true`. Do not lower the severity
 threshold or remove `exit-code: '1'` — both the config scan and the image scan
 must remain blocking.
+
+### Weekly scan
+`weekly-scan.yml` scans `ghcr.io/davralin/lfmv:latest` every Sunday 09:00 UTC.
+It is independent of the release workflow — a failure sends a GitHub notification
+but does not gate Monday's release.
+
+### SBOM
+`sbom: true` on `docker/build-push-action` generates a Syft SBOM and attaches it
+as an OCI attestation alongside the image in GHCR. Inspect with:
+
+```sh
+docker buildx imagetools inspect ghcr.io/davralin/lfmv:main
+```
+
+### Containerfile — HEALTHCHECK
+Every Containerfile must include a `HEALTHCHECK` instruction. For single-shot
+containers, `HEALTHCHECK NONE` is the accepted value.
 
 ## Python / tests
 
