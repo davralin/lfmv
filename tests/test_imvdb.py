@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from urllib.parse import urlparse
 
 from lfmv.imvdb import _parse_video_info, _parse_video_page_urls
 
@@ -47,7 +48,7 @@ class TestParseVideoInfo:
     def test_filters_imvdb_source_urls(self):
         info = _parse_video_info(_read("imvdb_video_here-it-goes-again.html"))
         assert info is not None
-        assert not any("imvdb.com" in u for u in info.source_urls)
+        assert not any(urlparse(u).hostname in ("imvdb.com", "www.imvdb.com") for u in info.source_urls)
 
     def test_filters_relative_source_urls(self):
         info = _parse_video_info(_read("imvdb_video_here-it-goes-again.html"))

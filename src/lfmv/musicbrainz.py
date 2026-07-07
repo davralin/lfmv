@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from urllib.parse import urlparse
+
 import httpx
 import structlog
 
@@ -43,7 +45,7 @@ def get_imvdb_slug(mbid: str, config: Config) -> str | None:
     for rel in relations:
         url_obj = rel.get("url", {})
         resource: str = url_obj.get("resource", "")
-        if "imvdb.com" in resource:
+        if urlparse(resource).hostname in ("imvdb.com", "www.imvdb.com"):
             # URL format: https://imvdb.com/n/{slug}
             slug = resource.rstrip("/").rsplit("/", 1)[-1]
             log.debug("imvdb_slug_found", mbid=mbid, slug=slug, url=resource)
