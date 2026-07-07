@@ -30,6 +30,9 @@ USER lfmv
 # Default output mount point
 VOLUME ["/music-videos"]
 
+# Single-shot container: health checks are not applicable
+HEALTHCHECK NONE
+
 # Run the pipeline once and exit
 ENTRYPOINT ["uv", "run", "--no-dev", "python", "-m", "lfmv"]
 CMD ["run"]
