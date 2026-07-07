@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from urllib.parse import urljoin, urlparse, urlparse
+from urllib.parse import urljoin, urlparse
 
 import httpx
 import structlog
@@ -75,7 +75,8 @@ def _parse_video_info(html: str) -> VideoInfo | None:
     if sources_section:
         for tag in sources_section.find_all("a", href=True):
             href: str = tag["href"]
-            if href.startswith("http") and urlparse(href).hostname not in ("imvdb.com", "www.imvdb.com"):
+            parsed_host = urlparse(href).hostname
+            if href.startswith("http") and parsed_host not in ("imvdb.com", "www.imvdb.com"):
                 source_urls.append(href)
 
     return VideoInfo(title=title, year=year, source_urls=source_urls)

@@ -48,7 +48,9 @@ class TestParseVideoInfo:
     def test_filters_imvdb_source_urls(self):
         info = _parse_video_info(_read("imvdb_video_here-it-goes-again.html"))
         assert info is not None
-        assert not any(urlparse(u).hostname in ("imvdb.com", "www.imvdb.com") for u in info.source_urls)
+        assert not any(
+            urlparse(u).hostname in ("imvdb.com", "www.imvdb.com") for u in info.source_urls
+        )
 
     def test_filters_relative_source_urls(self):
         info = _parse_video_info(_read("imvdb_video_here-it-goes-again.html"))
