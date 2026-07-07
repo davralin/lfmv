@@ -6,10 +6,16 @@ on:
   workflow_dispatch:
 
 jobs:
-  tag:
+  image:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
+      packages: write
+      id-token: write
+      security-events: write
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
+      calver_tag: ${{ steps.calver.outputs.tag }}
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7
 
@@ -26,8 +32,121 @@ jobs:
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Push tag
+      - name: Set up QEMU
+        if: steps.check.outputs.exists == 'false'
+        uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8  # v4
+
+      - name: Set up Docker Buildx
+        if: steps.check.outputs.exists == 'false'
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c  # v4
+
+      - name: Docker metadata
+        id: meta
+        if: steps.check.outputs.exists == 'false'
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302  # v6
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=raw,value=${{ steps.calver.outputs.tag }}
+            type=raw,value=latest
+
+      - name: Login to GHCR
+        if: steps.check.outputs.exists == 'false'
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0  # v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        id: build
+        if: steps.check.outputs.exists == 'false'
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a  # v7
+        with:
+          context: .
+          file: Containerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          provenance: true
+          sbom: true
+
+      - name: Set image ref for Trivy
+        id: image-ref
         if: steps.check.outputs.exists == 'false'
         run: |
-          git tag "${{ steps.calver.outputs.tag }}"
-          git push origin "${{ steps.calver.outputs.tag }}"
+          echo "ref=ghcr.io/${{ github.repository }}@${{ steps.build.outputs.digest }}" >> "$GITHUB_OUTPUT"
+
+      - name: Trivy — Containerfile config scan
+        if: steps.check.outputs.exists == 'false'
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25  # v0.36.0
+        env:
+          TRIVY_SKIP_VERSION_CHECK: "true"
+        with:
+          scan-type: config
+          scan-ref: Containerfile
+          severity: CRITICAL,HIGH
+          exit-code: '1'
+          format: sarif
+          output: trivy-config.sarif
+
+      - name: Upload Containerfile SARIF
+        if: steps.check.outputs.exists == 'false'
+        uses: github/codeql-action/upload-sarif@54f647b7e1bb85c95cddabcd46b0c578ec92bc1a  # v4
+        with:
+          sarif_file: trivy-config.sarif
+          category: trivy-config
+
+      - name: Trivy — image scan
+        if: steps.check.outputs.exists == 'false'
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25  # v0.36.0
+        env:
+          TRIVY_SKIP_VERSION_CHECK: "true"
+        with:
+          scan-type: image
+          image-ref: ${{ steps.image-ref.outputs.ref }}
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: '1'
+          scanners: vuln
+          format: sarif
+          output: trivy-image.sarif
+
+      - name: Upload image SARIF
+        if: steps.check.outputs.exists == 'false'
+        uses: github/codeql-action/upload-sarif@54f647b7e1bb85c95cddabcd46b0c578ec92bc1a  # v4
+        with:
+          sarif_file: trivy-image.sarif
+          category: trivy-image
+
+  provenance:
+    needs: [image]
+    if: needs.image.outputs.digest != ''
+    permissions:
+      actions: read
+      id-token: write
+      packages: write
+    # Pinned by tag rather than commit SHA: the generator embeds the workflow ref
+    # in the provenance certificate and slsa-verifier expects a versioned tag in
+    # the OIDC claims. Pinning by SHA breaks that verification.
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v2.1.0
+    with:
+      image: ghcr.io/${{ github.repository }}
+      digest: ${{ needs.image.outputs.digest }}
+      registry-username: ${{ github.actor }}
+    secrets:
+      registry-password: ${{ secrets.GITHUB_TOKEN }}
+
+  tag:
+    needs: [provenance]
+    if: needs.image.outputs.digest != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7
+      - name: Push CalVer tag
+        run: |
+          git tag "${{ needs.image.outputs.calver_tag }}"
+          git push origin "${{ needs.image.outputs.calver_tag }}"

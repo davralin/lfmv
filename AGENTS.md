@@ -18,6 +18,17 @@ curl -sf "https://api.github.com/repos/<owner>/<action>/tags?per_page=5"
 
 Update both the SHA and the version comment.
 
+### CI vs Release split
+Two workflows build container images with different attestation levels:
+
+- **`ci.yml`** — triggered on push to `main` and PRs. Builds test images
+  tagged `:latest`, `:main`, and `:sha-xxxxx` **without** SLSA provenance or
+  SBOM (fast builds). Trivy scans run. No git tags are created.
+- **`release.yml`** — triggered on schedule (Monday 09:00 UTC) or
+  `workflow_dispatch`. Builds attested images with full SLSA L3 provenance +
+  SBOM, tagged with the CalVer date (`YYYY.MM.DD`) and `:latest`. Pushes the
+  CalVer git tag only after all steps succeed.
+
 ### slsa-github-generator — tag pin exception
 `slsa-framework/slsa-github-generator` **must** be pinned by version tag, not SHA:
 
@@ -30,9 +41,9 @@ certificate. `slsa-verifier` expects a versioned tag in that claim; a SHA pin
 produces a non-verifiable certificate. Do not "fix" this to a SHA.
 
 ### provenance job
-The `provenance` job is a reusable workflow call (`uses:`). It cannot contain
-`steps:`. All image-build logic belongs in the `image` job, which exposes its
-registry digest via `outputs.digest`.
+The `provenance` job exists only in `release.yml`. It is a reusable workflow
+call (`uses:`) and cannot contain `steps:`. All image-build logic belongs in the
+`image` job, which exposes its registry digest via `outputs.digest`.
 
 ### Trivy policy
 `severity: CRITICAL,HIGH`, `ignore-unfixed: true`. Do not lower the severity
