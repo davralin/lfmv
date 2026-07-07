@@ -16,12 +16,10 @@ COPY --from=ghcr.io/astral-sh/uv:0.11.27@sha256:4d01caf3b22dfd11003455e2e68153da
 
 WORKDIR /app
 
-# Dependency layer (cached as long as pyproject.toml / uv.lock don't change)
+# Application source and dependencies
 COPY pyproject.toml uv.lock README.md ./
-RUN uv sync --frozen --no-dev --no-editable
-
-# Application source
 COPY src/ src/
+RUN uv sync --frozen --no-dev --no-editable
 
 # Run as non-root
 RUN chown -R lfmv /app
@@ -33,6 +31,6 @@ VOLUME ["/music-videos"]
 # Single-shot container: health checks are not applicable
 HEALTHCHECK NONE
 
-# Run the pipeline once and exit
-ENTRYPOINT ["uv", "run", "--no-dev", "python", "-m", "lfmv"]
+# Dependencies and app are already installed in .venv; run directly
+ENTRYPOINT ["/app/.venv/bin/python", "-m", "lfmv"]
 CMD ["run"]
