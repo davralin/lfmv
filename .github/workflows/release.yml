@@ -139,7 +139,7 @@ jobs:
       registry-password: ${{ secrets.GITHUB_TOKEN }}
 
   tag:
-    needs: [provenance]
+    needs: [provenance, image]
     if: needs.image.outputs.digest != ''
     runs-on: ubuntu-latest
     permissions:
