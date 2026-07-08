@@ -31,6 +31,17 @@ class TestParseVideoPageUrls:
     def test_empty_page_returns_empty_list(self):
         assert _parse_video_page_urls("<html><body></body></html>", "ok-go") == []
 
+    def test_matches_absolute_hrefs(self):
+        html = """<html><body>
+            <a href="https://imvdb.com/video/ok-go/here-it-goes-again">Here It Goes Again</a>
+            <a href="https://imvdb.com/video/ok-go/get-over-it">Get Over It</a>
+            <a href="https://imvdb.com/video/other-artist/collab">Collab</a>
+        </body></html>"""
+        urls = _parse_video_page_urls(html, "ok-go")
+        assert "https://imvdb.com/video/ok-go/here-it-goes-again" in urls
+        assert "https://imvdb.com/video/ok-go/get-over-it" in urls
+        assert not any("other-artist" in u for u in urls)
+
 
 class TestParseVideoInfo:
     def test_extracts_title_and_year(self):

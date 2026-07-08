@@ -37,14 +37,19 @@ class VideoInfo:
 def _parse_video_page_urls(html: str, slug: str) -> list[str]:
     """Parse an IMVDb artist page and return video detail page URLs for this artist."""
     soup = BeautifulSoup(html, "lxml")
-    pattern = re.compile(rf"^/video/{re.escape(slug)}/")
+    rel_pattern = re.compile(rf"^/video/{re.escape(slug)}/")
+    abs_pattern = re.compile(rf"^https?://(?:www\.)?imvdb\.com/video/{re.escape(slug)}/")
     seen: set[str] = set()
     results: list[str] = []
-    for tag in soup.find_all("a", href=pattern):
+    for tag in soup.find_all("a", href=True):
         href: str = tag["href"]
-        if href not in seen:
-            seen.add(href)
-            results.append(urljoin(IMVDB_BASE, href))
+        if not (rel_pattern.match(href) or abs_pattern.match(href)):
+            continue
+        # Normalise to absolute URL
+        full = urljoin(IMVDB_BASE, href) if href.startswith("/") else href
+        if full not in seen:
+            seen.add(full)
+            results.append(full)
     return results
 
 
