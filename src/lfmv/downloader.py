@@ -44,7 +44,11 @@ def download_video(
     False on error.
     """
     artist_dir = Path(config.output_dir) / _sanitize(artist_name)
-    outtmpl = str(artist_dir / config.output_template) + ".%(ext)s"
+    if title:
+        clean = _sanitize(title)
+        outtmpl = str(artist_dir / f"{clean}/{clean}") + ".%(ext)s"
+    else:
+        outtmpl = str(artist_dir / config.output_template) + ".%(ext)s"
 
     if dry_run:
         log.info("dry_run_skip_download", url=url, artist=artist_name, outtmpl=outtmpl)
@@ -66,8 +70,6 @@ def download_video(
         "embedthumbnail": True,
         "embedsubs": True,
         "subtitleslangs": ["all"],
-        # Override title with clean IMVDb title (avoids YouTube page title junk)
-        **({"parse_metadata": [("title", title)]} if title else {}),
         "postprocessors": [
             {"key": "FFmpegMetadata", "add_metadata": True},
             {"key": "EmbedThumbnail"},
