@@ -1,0 +1,24 @@
+{
+  "id": 458160868720,
+  "song_title": "Here It Goes Again",
+  "year": 2006,
+  "url": "https://imvdb.com/video/ok-go/here-it-goes-again",
+  "artists": [
+    {
+      "slug": "ok-go",
+      "name": "OK Go"
+    }
+  ],
+  "sources": [
+    {
+      "source": "youtube",
+      "source_data": "dTAAsCNK7RA",
+      "is_primary": true
+    },
+    {
+      "source": "vimeo",
+      "source_data": "12345",
+      "is_primary": false
+    }
+  ]
+}

@@ -43,6 +43,10 @@ class Config:
     # Seconds to sleep between MusicBrainz requests (official limit: 1/s)
     musicbrainz_rate_limit: float
 
+    # IMVDb
+    imvdb_api_key: str
+    imvdb_rate_limit: float
+
     # Logging
     log_level: str
 
@@ -56,5 +60,7 @@ class Config:
             ytdlp_format=_optional_none("YTDLP_FORMAT"),
             musicbrainz_url=_optional("MUSICBRAINZ_URL", "https://musicbrainz.org").rstrip("/"),
             musicbrainz_rate_limit=float(_optional("MUSICBRAINZ_RATE_LIMIT", "1.0")),
+            imvdb_api_key=_require("IMVDB_API_KEY"),
+            imvdb_rate_limit=float(_optional("IMVDB_RATE_LIMIT", "0.1")),
             log_level=_optional("LOG_LEVEL", "INFO").upper(),
         )

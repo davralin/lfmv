@@ -64,64 +64,34 @@ def run(
             skipped += 1
             continue
 
-        # --- Step 3: Scrape IMVDb artist page for video URLs ---
+        # --- Step 3: Search IMVDb for videos with sources ---
         try:
-            video_page_urls = imvdb.get_video_page_urls(slug)
+            videos = imvdb.get_artist_videos(artist.name, slug, config)
         except Exception:
-            artist_log.exception("imvdb_scrape_error", slug=slug)
+            artist_log.exception("imvdb_search_error", slug=slug)
             skipped += 1
             continue
 
-        if not video_page_urls:
+        if not videos:
             artist_log.info("no_videos_skipping", slug=slug)
             skipped += 1
             continue
 
-        artist_log.info("processing_videos", slug=slug, video_count=len(video_page_urls))
+        artist_log.info("processing_videos", slug=slug, video_count=len(videos))
 
-        # --- Step 4: For each video page, get source URLs and download ---
-        for video_url in video_page_urls:
-            video_info = None
-            try:
-                video_info = imvdb.get_video_info(video_url)
-            except Exception:
-                artist_log.exception("imvdb_video_scrape_error", video_url=video_url)
-                failed += 1
-                continue
-
-            if video_info is None:
-                artist_log.info("no_video_info", video_url=video_url)
-                skipped += 1
-                continue
-
-            if not video_info.source_urls:
-                artist_log.info(
-                    "no_source_urls",
-                    video_url=video_url,
-                    title=video_info.title,
-                )
-                skipped += 1
-                continue
-
-            video_log = artist_log.bind(title=video_info.title, year=video_info.year)
-
-            # Use the first available source URL (usually YouTube)
-            source_url = video_info.source_urls[0]
-            if len(video_info.source_urls) > 1:
-                video_log.debug(
-                    "multiple_sources_using_first",
-                    sources=video_info.source_urls,
-                )
+        # --- Step 4: Download each video ---
+        for video in videos:
+            video_log = artist_log.bind(title=video.title, year=video.year)
 
             try:
                 ok = downloader.download_video(
-                    source_url,
+                    video.source_url,
                     artist.name,
                     config,
                     dry_run=dry_run,
                 )
             except Exception:
-                video_log.exception("download_unexpected_error", url=source_url)
+                video_log.exception("download_unexpected_error", url=video.source_url)
                 failed += 1
                 continue
 

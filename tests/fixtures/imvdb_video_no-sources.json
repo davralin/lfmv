@@ -1,0 +1,19 @@
+{
+  "id": 362290139024,
+  "song_title": "Get Over It",
+  "year": 2005,
+  "url": "https://imvdb.com/video/ok-go/get-over-it",
+  "artists": [
+    {
+      "slug": "ok-go",
+      "name": "OK Go"
+    }
+  ],
+  "sources": [
+    {
+      "source": "youtube",
+      "source_data": "pbXH-E9kIhg",
+      "is_primary": true
+    }
+  ]
+}

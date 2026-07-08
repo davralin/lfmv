@@ -4,7 +4,7 @@ Integration tests for the lfmv pipeline.
 These tests exercise each stage of the pipeline against live services:
   - Lidarr (local ephemeral container)
   - MusicBrainz (official API, rate-limited)
-  - IMVDb (public HTML scraping)
+  - IMVDb (REST API)
 
 They do NOT download any videos (dry_run=True).
 
@@ -38,6 +38,7 @@ def _make_config(lidarr_fixture: dict, tmp_path) -> Config:
     os.environ["LIDARR_API_KEY"] = lidarr_fixture["api_key"]
     os.environ["LIDARR_URL"] = lidarr_fixture["url"]
     os.environ["OUTPUT_DIR"] = str(tmp_path)
+    os.environ.setdefault("IMVDB_API_KEY", LIDARR_TEST_API_KEY)
     return Config.from_env()
 
 
@@ -79,6 +80,7 @@ def test_lidarr_artist_has_mbid(lidarr):
 def test_musicbrainz_resolves_imvdb_slug():
     """OK Go's MBID resolves to the expected IMVDb slug via MusicBrainz."""
     os.environ.setdefault("LIDARR_API_KEY", LIDARR_TEST_API_KEY)
+    os.environ.setdefault("IMVDB_API_KEY", LIDARR_TEST_API_KEY)
     config = Config.from_env()
 
     slug = musicbrainz.get_imvdb_slug(TEST_ARTIST_MBID, config)
@@ -92,6 +94,7 @@ def test_musicbrainz_resolves_imvdb_slug():
 def test_musicbrainz_unknown_mbid_returns_none():
     """A made-up MBID returns None without raising."""
     os.environ.setdefault("LIDARR_API_KEY", LIDARR_TEST_API_KEY)
+    os.environ.setdefault("IMVDB_API_KEY", LIDARR_TEST_API_KEY)
     config = Config.from_env()
 
     slug = musicbrainz.get_imvdb_slug("00000000-0000-0000-0000-000000000000", config)
@@ -105,33 +108,41 @@ def test_musicbrainz_unknown_mbid_returns_none():
 
 
 @pytest.mark.integration
-def test_imvdb_artist_page_returns_videos():
-    """Scraping OK Go's IMVDb page returns at least one video URL."""
-    video_urls = imvdb.get_video_page_urls(TEST_ARTIST_IMVDB_SLUG)
+def test_imvdb_search_returns_videos():
+    """Searching for OK Go on IMVDb returns at least one video."""
+    os.environ.setdefault("IMVDB_API_KEY", LIDARR_TEST_API_KEY)
+    config = Config.from_env()
 
-    assert len(video_urls) >= 1, "Expected at least one video URL from IMVDb"
-    for url in video_urls:
-        assert url.startswith("https://imvdb.com/video/"), f"Unexpected URL format: {url!r}"
+    results = imvdb.search_videos("OK Go", config)
+
+    assert len(results) >= 1, "Expected at least one video from IMVDb search"
+    for v in results:
+        assert "song_title" in v, f"Missing song_title in result: {v}"
 
 
 @pytest.mark.integration
-def test_imvdb_video_page_has_source_url():
-    """A video detail page yields a VideoInfo with at least one source URL."""
-    video_urls = imvdb.get_video_page_urls(TEST_ARTIST_IMVDB_SLUG)
-    assert video_urls, "No video URLs scraped — cannot test video detail page"
+def test_imvdb_get_artist_videos_returns_sources():
+    """Fetching OK Go's videos with sources returns at least one VideoInfo."""
+    os.environ.setdefault("IMVDB_API_KEY", LIDARR_TEST_API_KEY)
+    config = Config.from_env()
 
-    info = imvdb.get_video_info(video_urls[0])
+    videos = imvdb.get_artist_videos(TEST_ARTIST_NAME, TEST_ARTIST_IMVDB_SLUG, config)
 
-    assert info is not None, f"get_video_info returned None for {video_urls[0]}"
-    assert info.title, "VideoInfo.title is empty"
-    assert info.source_urls, "VideoInfo.source_urls is empty"
+    assert len(videos) >= 1, "Expected at least one video with sources"
+    for v in videos:
+        assert v.title, "VideoInfo.title is empty"
+        assert v.source_url, "VideoInfo.source_url is empty"
+        assert v.source_type in ("youtube", "vimeo"), f"Unexpected source_type: {v.source_type}"
 
 
 @pytest.mark.integration
 def test_imvdb_unknown_slug_returns_empty():
     """A non-existent IMVDb slug returns an empty list without raising."""
-    urls = imvdb.get_video_page_urls("this-artist-does-not-exist-lfmv-test")
-    assert urls == []
+    os.environ.setdefault("IMVDB_API_KEY", LIDARR_TEST_API_KEY)
+    config = Config.from_env()
+
+    videos = imvdb.get_artist_videos("Fake Artist", "fake-artist-does-not-exist", config)
+    assert videos == []
 
 
 # ---------------------------------------------------------------------------

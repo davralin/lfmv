@@ -1,0 +1,34 @@
+{
+  "total_results": 2,
+  "current_page": 1,
+  "per_page": 50,
+  "total_pages": 1,
+  "results": [
+    {
+      "id": 458160868720,
+      "song_title": "Here It Goes Again",
+      "year": 2006,
+      "url": "https://imvdb.com/video/ok-go/here-it-goes-again",
+      "artists": [
+        {
+          "slug": "ok-go",
+          "name": "OK Go"
+        }
+      ],
+      "production_status": "r"
+    },
+    {
+      "id": 362290139024,
+      "song_title": "Get Over It",
+      "year": 2005,
+      "url": "https://imvdb.com/video/ok-go/get-over-it",
+      "artists": [
+        {
+          "slug": "ok-go",
+          "name": "OK Go"
+        }
+      ],
+      "production_status": "r"
+    }
+  ]
+}

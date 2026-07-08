@@ -33,6 +33,7 @@ def get(
     url: str,
     *,
     extra_headers: dict[str, str] | None = None,
+    params: dict[str, str | int] | None = None,
     timeout: float = 30.0,
     retries: int = 3,
 ) -> httpx.Response:
@@ -43,7 +44,9 @@ def get(
 
     for attempt in range(retries):
         try:
-            resp = httpx.get(url, headers=headers, timeout=timeout, follow_redirects=True)
+            resp = httpx.get(
+                url, headers=headers, params=params, timeout=timeout, follow_redirects=True
+            )
             if resp.status_code < 500:
                 return resp
             log.warning("http_5xx_retrying", url=url, status=resp.status_code, attempt=attempt + 1)
