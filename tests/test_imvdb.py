@@ -135,8 +135,11 @@ class TestGetArtistVideos:
             },
         ]
         mock_sources.return_value = VideoInfo(
-            title="Song A", year=2020, source_url="https://youtube.com/watch?v=abc",
-            source_type="youtube", source_id="abc",
+            title="Song A",
+            year=2020,
+            source_url="https://youtube.com/watch?v=abc",
+            source_type="youtube",
+            source_id="abc",
         )
 
         config = _make_config()
