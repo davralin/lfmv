@@ -45,7 +45,6 @@ class Config:
 
     # IMVDb
     imvdb_api_key: str
-    imvdb_rate_limit: float
 
     # Logging
     log_level: str
@@ -61,6 +60,5 @@ class Config:
             musicbrainz_url=_optional("MUSICBRAINZ_URL", "https://musicbrainz.org").rstrip("/"),
             musicbrainz_rate_limit=float(_optional("MUSICBRAINZ_RATE_LIMIT", "1.0")),
             imvdb_api_key=_require("IMVDB_API_KEY"),
-            imvdb_rate_limit=float(_optional("IMVDB_RATE_LIMIT", "0.1")),
             log_level=_optional("LOG_LEVEL", "INFO").upper(),
         )

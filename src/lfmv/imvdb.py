@@ -24,6 +24,7 @@ log = structlog.get_logger(__name__)
 
 IMVDB_API_BASE = "https://imvdb.com/api/v1"
 _limiter = http.RateLimiter()
+IMVDB_RATE_LIMIT = 1.0
 
 # Source type -> URL template.  yt-dlp also accepts "youtube:{id}" directly.
 _SOURCE_URLS: dict[str, str] = {
@@ -49,7 +50,7 @@ def _api_get(
 ) -> httpx.Response:
     """Make an authenticated GET request to the IMVDb API."""
     url = f"{IMVDB_API_BASE}{path}"
-    _limiter.wait(config.imvdb_rate_limit)
+    _limiter.wait(IMVDB_RATE_LIMIT)
     return http.get(
         url,
         extra_headers={"IMVDB-APP-KEY": config.imvdb_api_key},

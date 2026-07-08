@@ -19,7 +19,6 @@ def _make_config(tmp_path: Path) -> Config:
         musicbrainz_url="https://musicbrainz.org",
         musicbrainz_rate_limit=1.0,
         imvdb_api_key="imvdbkey",
-        imvdb_rate_limit=0.1,
         log_level="INFO",
     )
 

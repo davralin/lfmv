@@ -38,7 +38,6 @@ def test_defaults(monkeypatch):
     assert cfg.musicbrainz_url == "https://musicbrainz.org"
     assert cfg.musicbrainz_rate_limit == 1.0
     assert cfg.imvdb_api_key == "imvdbtestkey"
-    assert cfg.imvdb_rate_limit == 0.1
     assert cfg.log_level == "INFO"
 
 

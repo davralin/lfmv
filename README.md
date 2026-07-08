@@ -95,7 +95,6 @@ All configuration is via environment variables.
 | `LIDARR_URL` | `http://localhost:8686` | Lidarr base URL |
 | `LIDARR_API_KEY` | **required** | Lidarr API key |
 | `IMVDB_API_KEY` | **required** | IMVDb API key |
-| `IMVDB_RATE_LIMIT` | `0.1` | Seconds between IMVDb requests |
 | `OUTPUT_DIR` | `/music-videos` | Base directory for downloaded videos |
 | `OUTPUT_TEMPLATE` | `%(title)s/%(title)s` | yt-dlp output template, relative to artist directory. Full path: `{OUTPUT_DIR}/{artist}/{OUTPUT_TEMPLATE}.%(ext)s` |
 | `YTDLP_FORMAT` | *(yt-dlp default)* | yt-dlp format selector (e.g. `bestvideo+bestaudio/best`) |
