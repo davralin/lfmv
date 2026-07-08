@@ -5,12 +5,12 @@
 ## Pipeline
 
 ```
-Lidarr API  →  MusicBrainz  →  IMVDb (scrape)  →  yt-dlp
+Lidarr API  →  MusicBrainz  →  IMVDb REST API  →  yt-dlp
 ```
 
 1. Fetch all artists from Lidarr via its REST API (MusicBrainz IDs)
 2. Query MusicBrainz for each artist's URL relationships to find their IMVDb link
-3. Scrape IMVDb for the artist's full video list and source URLs
+3. Search IMVDb API for artist videos and resolve YouTube/Vimeo source URLs
 4. Download via yt-dlp (as a library, not subprocess) with full metadata
 
 ## Design
@@ -29,6 +29,7 @@ Lidarr API  →  MusicBrainz  →  IMVDb (scrape)  →  yt-dlp
 docker run --rm \
   -e LIDARR_URL=http://lidarr:8686 \
   -e LIDARR_API_KEY=your-api-key \
+  -e IMVDB_API_KEY=your-imvdb-key \
   -v /path/to/music-videos:/music-videos \
   ghcr.io/davralin/lfmv:latest
 ```
@@ -93,6 +94,8 @@ All configuration is via environment variables.
 |---|---|---|
 | `LIDARR_URL` | `http://localhost:8686` | Lidarr base URL |
 | `LIDARR_API_KEY` | **required** | Lidarr API key |
+| `IMVDB_API_KEY` | **required** | IMVDb API key |
+| `IMVDB_RATE_LIMIT` | `0.1` | Seconds between IMVDb requests |
 | `OUTPUT_DIR` | `/music-videos` | Base directory for downloaded videos |
 | `OUTPUT_TEMPLATE` | `%(title)s/%(title)s` | yt-dlp output template, relative to artist directory. Full path: `{OUTPUT_DIR}/{artist}/{OUTPUT_TEMPLATE}.%(ext)s` |
 | `YTDLP_FORMAT` | *(yt-dlp default)* | yt-dlp format selector (e.g. `bestvideo+bestaudio/best`) |
@@ -133,7 +136,7 @@ cd lfmv
 uv sync
 
 # Run against a real Lidarr instance
-LIDARR_URL=http://localhost:8686 LIDARR_API_KEY=xxx uv run python -m lfmv run --dry-run
+LIDARR_URL=http://localhost:8686 LIDARR_API_KEY=xxx IMVDB_API_KEY=xxx uv run python -m lfmv run --dry-run
 
 # Process a single artist only
 uv run python -m lfmv run --artist "OK Go" --dry-run
@@ -150,7 +153,7 @@ uv run pytest tests/ -m integration -v
 Tests cover:
 - Lidarr API connectivity and artist fetching
 - MusicBrainz MBID → IMVDb slug resolution
-- IMVDb artist page and video detail page scraping
+- IMVDb search API and video source resolution
 - Full pipeline dry-run (Lidarr → MusicBrainz → IMVDb, no actual download)
 
 ## Credits

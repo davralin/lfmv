@@ -79,9 +79,10 @@ CI runs only unit tests: `pytest -m "not integration"`.
 Integration tests are run manually: `uv run pytest tests/ -m integration -v`.
 
 ### Network in tests
-Unit tests must not make real network calls. Use HTML fixtures in
-`tests/fixtures/` and call the `_parse_*` helpers directly. Do not mock the
-network in integration tests — they exist precisely to exercise real HTTP paths.
+Unit tests must not make real network calls. Use JSON fixtures in
+`tests/fixtures/` and mock the HTTP calls with `unittest.mock.patch`. Do not
+mock the network in integration tests — they exist precisely to exercise real
+HTTP paths.
 
 ### Adding new modules
 New source modules go in `src/lfmv/`. Shared HTTP utilities (rate limiting,
