@@ -28,6 +28,7 @@ def download_video(
     artist_name: str,
     config: Config,
     *,
+    title: str | None = None,
     dry_run: bool = False,
 ) -> bool:
     """
@@ -65,14 +66,8 @@ def download_video(
         "embedthumbnail": True,
         "embedsubs": True,
         "subtitleslangs": ["all"],
-        # Clean up YouTube-style title junk before rendering filenames
-        "replace_in_metadata": [
-            ["title", r"\s*[\(\[][Oo]fficial\s+(Music\s+)?[Vv]ideo[\)\]]", ""],
-            ["title", r"\s*[\(\[][Oo]fficial\s+[Aa]udio[\)\]]", ""],
-            ["title", r"\s*[\(\[][Ll]yric\s+[Vv]ideo[\)\]]", ""],
-            ["title", r"\s*[\(\[][45][Kk][\)\]]", ""],
-            ["title", r"\s*[\(\[]HD[\)\]]", ""],
-        ],
+        # Override title with clean IMVDb title (avoids YouTube page title junk)
+        **({"parse_metadata": [("title", title)]} if title else {}),
         "postprocessors": [
             {"key": "FFmpegMetadata", "add_metadata": True},
             {"key": "EmbedThumbnail"},

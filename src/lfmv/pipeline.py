@@ -88,6 +88,7 @@ def run(
                     video.source_url,
                     artist.name,
                     config,
+                    title=video.title,
                     dry_run=dry_run,
                 )
             except Exception:
