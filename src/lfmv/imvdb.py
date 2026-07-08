@@ -83,6 +83,17 @@ def _parse_video_info(html: str) -> VideoInfo | None:
             parsed_host = urlparse(href).hostname
             if href.startswith("http") and parsed_host not in ("imvdb.com", "www.imvdb.com"):
                 source_urls.append(href)
+    else:
+        for heading in soup.find_all(["h1", "h2", "h3", "h4", "h5", "h6"]):
+            if "Video Sources" in heading.get_text():
+                ul = heading.find_next("ul")
+                if ul:
+                    for tag in ul.find_all("a", href=True):
+                        href: str = tag["href"]
+                        parsed_host = urlparse(href).hostname
+                        if href.startswith("http") and parsed_host not in ("imvdb.com", "www.imvdb.com"):
+                            source_urls.append(href)
+                break
 
     return VideoInfo(title=title, year=year, source_urls=source_urls)
 
