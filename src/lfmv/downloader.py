@@ -65,6 +65,14 @@ def download_video(
         "embedthumbnail": True,
         "embedsubs": True,
         "subtitleslangs": ["all"],
+        # Clean up YouTube-style title junk before rendering filenames
+        "replace_in_metadata": [
+            ["title", r"\s*[\(\[][Oo]fficial\s+(Music\s+)?[Vv]ideo[\)\]]", ""],
+            ["title", r"\s*[\(\[][Oo]fficial\s+[Aa]udio[\)\]]", ""],
+            ["title", r"\s*[\(\[][Ll]yric\s+[Vv]ideo[\)\]]", ""],
+            ["title", r"\s*[\(\[][45][Kk][\)\]]", ""],
+            ["title", r"\s*[\(\[]HD[\)\]]", ""],
+        ],
         "postprocessors": [
             {"key": "FFmpegMetadata", "add_metadata": True},
             {"key": "EmbedThumbnail"},
