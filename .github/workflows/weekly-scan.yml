@@ -1,4 +1,4 @@
-name: Weekly Trivy Scan
+name: Weekly Image Scan
 
 on:
   schedule:
@@ -39,3 +39,19 @@ jobs:
         with:
           sarif_file: trivy-weekly.sarif
           category: trivy-weekly
+
+      - name: Grype — image scan
+        id: grype
+        uses: anchore/scan-action@e1165082ffb1fe366ebaf02d8526e7c4989ea9d2  # v7.4.0
+        with:
+          image: ghcr.io/${{ github.repository }}:latest
+          fail-build: true
+          severity-cutoff: high
+          output-format: sarif
+
+      - name: Upload Grype SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@54f647b7e1bb85c95cddabcd46b0c578ec92bc1a  # v4
+        with:
+          sarif_file: ${{ steps.grype.outputs.sarif }}
+          category: grype-weekly
