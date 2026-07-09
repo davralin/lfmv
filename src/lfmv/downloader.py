@@ -74,6 +74,7 @@ def download_video(
             {"key": "EmbedThumbnail"},
         ],
         # Suppress the noisy default progress bars; structlog handles our output
+        "nopart": True,
         "quiet": True,
         "no_warnings": False,
         # Geo-bypass attempts
