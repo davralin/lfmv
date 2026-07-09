@@ -109,21 +109,16 @@ All configuration is via environment variables.
 ├── OK Go/
 │   ├── .yt-dlp-archive        # deduplication state for this artist
 │   ├── WTF/
-│   │   ├── WTF.mkv
-│   │   ├── WTF.info.json
-│   │   └── WTF.webp
+│   │   └── WTF.mkv            # video + embedded metadata + thumbnail
 │   └── White Knuckles/
-│       ├── White Knuckles.mkv
-│       ├── White Knuckles.info.json
-│       └── White Knuckles.webp
+│       └── White Knuckles.mkv # video + embedded metadata + thumbnail
 └── Linkin Park/
     ├── .yt-dlp-archive
     └── Numb/
-        ├── Numb.mkv
-        └── ...
+        └── Numb.mkv
 ```
 
-This layout is compatible with Jellyfin's Music Videos library type.
+Video metadata (info.json) and thumbnails are embedded inside the `.mkv` container as attachments. This layout is compatible with Jellyfin's Music Videos library type.
 
 ## Development
 

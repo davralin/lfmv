@@ -63,10 +63,9 @@ def download_video(
         "download_archive": str(archive_path),
         # Always merge into mkv for consistent output
         "merge_output_format": "mkv",
-        # Metadata sidecars
-        "writeinfojson": True,
+        # Embed metadata into mkv container
+        "embed_infojson": True,
         "writethumbnail": True,
-        # Embed as much as possible into the mkv container
         "embedthumbnail": True,
         "embedsubs": True,
         "subtitleslangs": ["all"],
