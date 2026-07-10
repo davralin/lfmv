@@ -58,6 +58,11 @@ spec:
                 secretKeyRef:
                   name: lidarr-secret
                   key: api-key
+            - name: IMVDB_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: imvdb-secret
+                  key: api-key
             volumeMounts:
             - name: music-videos
               mountPath: /music-videos
