@@ -75,18 +75,21 @@ spec:
 
 ## Verifying the image
 
-Every image pushed to GHCR is signed with [SLSA Level 3 provenance](https://slsa.dev) via Sigstore keyless signing. Verify with [`slsa-verifier`](https://github.com/slsa-framework/slsa-verifier):
+Release images are tagged with the CalVer release date (`YYYY.MM.DD`) and
+`latest`. Use the immutable date tag when verifying
+[SLSA Level 3 provenance](https://slsa.dev) with
+[`slsa-verifier`](https://github.com/slsa-framework/slsa-verifier):
 
 ```sh
-slsa-verifier verify-image ghcr.io/davralin/lfmv:v1.2.3 \
+slsa-verifier verify-image ghcr.io/davralin/lfmv:<YYYY.MM.DD> \
   --source-uri github.com/davralin/lfmv \
-  --source-tag v1.2.3
+  --source-tag <YYYY.MM.DD>
 ```
 
 Or verify the cosign signature directly:
 
 ```sh
-cosign verify ghcr.io/davralin/lfmv:v1.2.3 \
+cosign verify ghcr.io/davralin/lfmv:<YYYY.MM.DD> \
   --certificate-identity-regexp '^https://github.com/davralin/lfmv/' \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com
 ```
