@@ -13,8 +13,7 @@ from lfmv.config import Config
 log = structlog.get_logger(__name__)
 
 # Characters that are unsafe in directory / file names on common filesystems.
-# We sanitize the artist name for the directory path we create ourselves;
-# yt-dlp handles sanitization of the title inside the template.
+# We sanitize path segments we provide; yt-dlp handles any placeholders left in the template.
 _UNSAFE_CHARS = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
 
 
@@ -43,10 +42,12 @@ def download_video(
     Returns True if the download succeeded (or was skipped via archive),
     False on error.
     """
-    artist_dir = Path(config.output_dir) / _sanitize(artist_name)
+    safe_artist = _sanitize(artist_name) or "Unknown Artist"
+    artist_dir = Path(config.output_dir) / safe_artist
     if title:
-        clean = _sanitize(title)
-        outtmpl = str(artist_dir / f"{clean}/{clean}") + ".%(ext)s"
+        safe_title = _sanitize(title) or "Unknown Title"
+        relative_template = config.output_template.replace("%(title)s", safe_title)
+        outtmpl = str(artist_dir / relative_template) + ".%(ext)s"
     else:
         outtmpl = str(artist_dir / config.output_template) + ".%(ext)s"
 
