@@ -47,6 +47,9 @@ def run(
     downloaded = 0
     skipped = 0
     failed = 0
+    no_imvdb_link: list[tuple[str, str]] = []
+    no_videos: list[tuple[str, str]] = []
+    few_videos: list[tuple[str, str, int]] = []
 
     for idx, artist in enumerate(artists, 1):
         artist_log = log.bind(artist=artist.name, mbid=artist.mbid, progress=f"{idx}/{total}")
@@ -61,21 +64,26 @@ def run(
 
         if not slug:
             artist_log.info("no_imvdb_link_skipping")
+            no_imvdb_link.append((artist.name, artist.mbid))
             skipped += 1
             continue
 
         # --- Step 3: Search IMVDb for videos with sources ---
         try:
-            videos = imvdb.get_artist_videos(artist.name, slug, config)
+            videos, video_count = imvdb.get_artist_videos(artist.name, slug, config)
         except Exception:
             artist_log.exception("imvdb_search_error", slug=slug)
             skipped += 1
             continue
 
-        if not videos:
+        if video_count == 0:
             artist_log.info("no_videos_skipping", slug=slug)
+            no_videos.append((artist.name, slug))
             skipped += 1
             continue
+
+        if video_count < 5:
+            few_videos.append((artist.name, slug, video_count))
 
         artist_log.info("processing_videos", slug=slug, video_count=len(videos))
 
@@ -108,3 +116,49 @@ def run(
         skipped=skipped,
         failed=failed,
     )
+
+    _print_summary(total, downloaded, skipped, failed, no_imvdb_link, no_videos, few_videos)
+
+
+def _print_summary(
+    total: int,
+    downloaded: int,
+    skipped: int,
+    failed: int,
+    no_imvdb_link: list[tuple[str, str]],
+    no_videos: list[tuple[str, str]],
+    few_videos: list[tuple[str, str, int]],
+) -> None:
+    """Print a human-readable summary of the run to stdout."""
+    print()
+    print("=" * 50)
+    print(f"  lfmv run complete - {total} artists processed")
+    print(f"  {downloaded} downloaded  |  {skipped} skipped  |  {failed} failed")
+    print("=" * 50)
+
+    if no_imvdb_link:
+        print()
+        print("No IMVDb page found - add to MusicBrainz:")
+        for name, mbid in no_imvdb_link:
+            print(f"  https://musicbrainz.org/artist/{mbid}/edit")
+            print(f"    {name}")
+
+    if no_videos:
+        print()
+        print("Zero music videos - add to IMVDb:")
+        for name, slug in no_videos:
+            print(f"  https://imvdb.com/n/{slug}")
+            print(f"    {name}")
+
+    if few_videos:
+        print()
+        print("Fewer than 5 music videos - add more to IMVDb:")
+        for name, slug, count in few_videos:
+            print(f"  https://imvdb.com/n/{slug}  ({count} videos)")
+            print(f"    {name}")
+
+    if not no_imvdb_link and not no_videos and not few_videos:
+        print()
+        print("All artists have IMVDb pages with 5+ music videos.")
+
+    print()

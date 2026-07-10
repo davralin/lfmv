@@ -140,13 +140,15 @@ def get_artist_videos(
     name: str,
     slug: str,
     config: Config,
-) -> list[VideoInfo]:
+) -> tuple[list[VideoInfo], int]:
     """Search for all videos by an artist and return those with downloadable sources.
 
     Uses the MusicBrainz slug to filter search results to the correct artist,
     since IMVDb's entity-by-slug endpoint is currently broken (returns 500).
 
-    Returns a list of VideoInfo objects ready for download.
+    Returns a tuple of (videos, matched_count) where videos are ready for
+    download and matched_count is the total number of slug-matched videos
+    found on IMVDb (before source filtering).
     """
     all_videos: list[dict] = []
     page = 1
@@ -185,4 +187,4 @@ def get_artist_videos(
             videos.append(info)
 
     log.info("imvdb_videos_with_sources", name=name, count=len(videos))
-    return videos
+    return videos, len(filtered)

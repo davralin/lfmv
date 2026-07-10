@@ -142,17 +142,19 @@ class TestGetArtistVideos:
         )
 
         config = _make_config()
-        videos = get_artist_videos("OK Go", "ok-go", config)
+        videos, count = get_artist_videos("OK Go", "ok-go", config)
 
         assert len(videos) == 1
+        assert count == 1
         assert videos[0].title == "Song A"
         mock_sources.assert_called_once_with(111, config)
 
     @patch("lfmv.imvdb.search_videos")
     def test_empty_search_returns_empty(self, mock_search):
         mock_search.return_value = []
-        videos = get_artist_videos("Unknown", "unknown", _make_config())
+        videos, count = get_artist_videos("Unknown", "unknown", _make_config())
         assert videos == []
+        assert count == 0
 
     @patch("lfmv.imvdb.get_video_sources")
     @patch("lfmv.imvdb.search_videos")
@@ -162,5 +164,6 @@ class TestGetArtistVideos:
         ]
         mock_sources.return_value = None
 
-        videos = get_artist_videos("OK Go", "ok-go", _make_config())
+        videos, count = get_artist_videos("OK Go", "ok-go", _make_config())
         assert videos == []
+        assert count == 1
