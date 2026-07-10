@@ -24,7 +24,6 @@ def test_defaults(monkeypatch):
         "YTDLP_FORMAT",
         "MUSICBRAINZ_URL",
         "MUSICBRAINZ_RATE_LIMIT",
-        "IMVDB_RATE_LIMIT",
         "LOG_LEVEL",
     ]:
         monkeypatch.delenv(var, raising=False)
