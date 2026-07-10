@@ -126,8 +126,9 @@ def test_imvdb_get_artist_videos_returns_sources():
     os.environ.setdefault("IMVDB_API_KEY", LIDARR_TEST_API_KEY)
     config = Config.from_env()
 
-    videos = imvdb.get_artist_videos(TEST_ARTIST_NAME, TEST_ARTIST_IMVDB_SLUG, config)
+    videos, count = imvdb.get_artist_videos(TEST_ARTIST_NAME, TEST_ARTIST_IMVDB_SLUG, config)
 
+    assert count >= 1, "Expected at least one slug-matched video from IMVDb"
     assert len(videos) >= 1, "Expected at least one video with sources"
     for v in videos:
         assert v.title, "VideoInfo.title is empty"
@@ -141,8 +142,9 @@ def test_imvdb_unknown_slug_returns_empty():
     os.environ.setdefault("IMVDB_API_KEY", LIDARR_TEST_API_KEY)
     config = Config.from_env()
 
-    videos = imvdb.get_artist_videos("Fake Artist", "fake-artist-does-not-exist", config)
+    videos, count = imvdb.get_artist_videos("Fake Artist", "fake-artist-does-not-exist", config)
     assert videos == []
+    assert count == 0
 
 
 # ---------------------------------------------------------------------------
