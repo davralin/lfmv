@@ -162,3 +162,14 @@ def _print_summary(
         print("All artists have IMVDb pages with 5+ music videos.")
 
     print()
+    print("Help improve the metadata ecosystem:")
+    print("  If an artist is missing an IMVDb page, add the IMVDb artist URL to")
+    print("  their MusicBrainz relationships.")
+    print()
+    print("  If an artist has no or few videos, add official music video entries")
+    print("  to IMVDb.")
+    print()
+    print("  These updates help lfmv, Lidarr users, and the wider")
+    print("  MusicBrainz/IMVDb community find better music video metadata.")
+
+    print()
