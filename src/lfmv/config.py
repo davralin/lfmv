@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
+from pathlib import PurePosixPath
 
 
 def _require(name: str) -> str:
@@ -19,6 +20,18 @@ def _optional(name: str, default: str) -> str:
 
 def _optional_none(name: str) -> str | None:
     return os.environ.get(name) or None
+
+
+def _output_template() -> str:
+    template = _optional("OUTPUT_TEMPLATE", "%(title)s/%(title)s")
+    if not template:
+        raise RuntimeError("OUTPUT_TEMPLATE must not be empty")
+
+    path = PurePosixPath(template)
+    if path.is_absolute() or ".." in path.parts:
+        raise RuntimeError("OUTPUT_TEMPLATE must be relative to the artist directory")
+
+    return template
 
 
 @dataclass(frozen=True)
@@ -55,7 +68,7 @@ class Config:
             lidarr_url=_optional("LIDARR_URL", "http://localhost:8686").rstrip("/"),
             lidarr_api_key=_require("LIDARR_API_KEY"),
             output_dir=_optional("OUTPUT_DIR", "/music-videos"),
-            output_template=_optional("OUTPUT_TEMPLATE", "%(title)s/%(title)s"),
+            output_template=_output_template(),
             ytdlp_format=_optional_none("YTDLP_FORMAT"),
             musicbrainz_url=_optional("MUSICBRAINZ_URL", "https://musicbrainz.org").rstrip("/"),
             musicbrainz_rate_limit=float(_optional("MUSICBRAINZ_RATE_LIMIT", "1.0")),

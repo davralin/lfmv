@@ -104,7 +104,7 @@ All configuration is via environment variables.
 | `LIDARR_API_KEY` | **required** | Lidarr API key |
 | `IMVDB_API_KEY` | **required** | IMVDb API key |
 | `OUTPUT_DIR` | `/music-videos` | Base directory for downloaded videos |
-| `OUTPUT_TEMPLATE` | `%(title)s/%(title)s` | yt-dlp output template, relative to artist directory. Full path: `{OUTPUT_DIR}/{artist}/{OUTPUT_TEMPLATE}.%(ext)s` |
+| `OUTPUT_TEMPLATE` | `%(title)s/%(title)s` | yt-dlp output template, relative to artist directory. Must not be absolute or contain `..`. Full path: `{OUTPUT_DIR}/{artist}/{OUTPUT_TEMPLATE}.%(ext)s` |
 | `YTDLP_FORMAT` | *(yt-dlp default)* | yt-dlp format selector (e.g. `bestvideo+bestaudio/best`) |
 | `MUSICBRAINZ_URL` | `https://musicbrainz.org` | MusicBrainz mirror URL |
 | `MUSICBRAINZ_RATE_LIMIT` | `1.0` | Seconds between MusicBrainz requests |

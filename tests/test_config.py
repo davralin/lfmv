@@ -45,6 +45,7 @@ def test_custom_values(monkeypatch):
     monkeypatch.setenv("IMVDB_API_KEY", "myimvdbkey")
     monkeypatch.setenv("LIDARR_URL", "http://lidarr:8686")
     monkeypatch.setenv("OUTPUT_DIR", "/videos")
+    monkeypatch.setenv("OUTPUT_TEMPLATE", "Videos/%(title)s/%(id)s")
     monkeypatch.setenv("YTDLP_FORMAT", "bestvideo+bestaudio")
     monkeypatch.setenv("MUSICBRAINZ_RATE_LIMIT", "2.5")
     monkeypatch.setenv("LOG_LEVEL", "debug")
@@ -52,6 +53,7 @@ def test_custom_values(monkeypatch):
     cfg = Config.from_env()
     assert cfg.lidarr_url == "http://lidarr:8686"
     assert cfg.output_dir == "/videos"
+    assert cfg.output_template == "Videos/%(title)s/%(id)s"
     assert cfg.ytdlp_format == "bestvideo+bestaudio"
     assert cfg.musicbrainz_rate_limit == 2.5
     assert cfg.imvdb_api_key == "myimvdbkey"
@@ -67,3 +69,30 @@ def test_strips_trailing_slash_from_urls(monkeypatch):
     cfg = Config.from_env()
     assert cfg.lidarr_url == "http://localhost:8686"
     assert cfg.musicbrainz_url == "https://musicbrainz.org"
+
+
+def test_rejects_empty_output_template(monkeypatch):
+    monkeypatch.setenv("LIDARR_API_KEY", "k")
+    monkeypatch.setenv("IMVDB_API_KEY", "ik")
+    monkeypatch.setenv("OUTPUT_TEMPLATE", "")
+
+    with pytest.raises(RuntimeError, match="OUTPUT_TEMPLATE must not be empty"):
+        Config.from_env()
+
+
+def test_rejects_absolute_output_template(monkeypatch):
+    monkeypatch.setenv("LIDARR_API_KEY", "k")
+    monkeypatch.setenv("IMVDB_API_KEY", "ik")
+    monkeypatch.setenv("OUTPUT_TEMPLATE", "/tmp/%(title)s")
+
+    with pytest.raises(RuntimeError, match="OUTPUT_TEMPLATE must be relative"):
+        Config.from_env()
+
+
+def test_rejects_parent_output_template(monkeypatch):
+    monkeypatch.setenv("LIDARR_API_KEY", "k")
+    monkeypatch.setenv("IMVDB_API_KEY", "ik")
+    monkeypatch.setenv("OUTPUT_TEMPLATE", "../%(title)s")
+
+    with pytest.raises(RuntimeError, match="OUTPUT_TEMPLATE must be relative"):
+        Config.from_env()
