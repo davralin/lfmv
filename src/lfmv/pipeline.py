@@ -44,9 +44,9 @@ def run(
         log.info("artist_filter_applied", filter=artist_filter, matched=len(artists))
 
     total = len(artists)
-    downloaded = 0
-    skipped = 0
-    failed = 0
+    videos_downloaded = 0
+    artists_skipped = 0
+    video_downloads_failed = 0
     no_imvdb_link: list[tuple[str, str]] = []
     no_videos: list[tuple[str, str]] = []
     few_videos: list[tuple[str, str, int]] = []
@@ -59,13 +59,13 @@ def run(
             slug = musicbrainz.get_imvdb_slug(artist.mbid, config)
         except Exception:
             artist_log.exception("musicbrainz_unexpected_error")
-            skipped += 1
+            artists_skipped += 1
             continue
 
         if not slug:
             artist_log.info("no_imvdb_link_skipping")
             no_imvdb_link.append((artist.name, artist.mbid))
-            skipped += 1
+            artists_skipped += 1
             continue
 
         # --- Step 3: Search IMVDb for videos with sources ---
@@ -73,13 +73,13 @@ def run(
             videos, video_count = imvdb.get_artist_videos(artist.name, slug, config)
         except Exception:
             artist_log.exception("imvdb_search_error", slug=slug)
-            skipped += 1
+            artists_skipped += 1
             continue
 
         if video_count == 0:
             artist_log.info("no_videos_skipping", slug=slug)
             no_videos.append((artist.name, slug))
-            skipped += 1
+            artists_skipped += 1
             continue
 
         if video_count < 5:
@@ -101,30 +101,38 @@ def run(
                 )
             except Exception:
                 video_log.exception("download_unexpected_error", url=video.source_url)
-                failed += 1
+                video_downloads_failed += 1
                 continue
 
             if ok:
-                downloaded += 1
+                videos_downloaded += 1
             else:
-                failed += 1
+                video_downloads_failed += 1
 
     log.info(
         "lfmv_done",
         total_artists=total,
-        downloaded=downloaded,
-        skipped=skipped,
-        failed=failed,
+        artists_skipped=artists_skipped,
+        videos_downloaded=videos_downloaded,
+        video_downloads_failed=video_downloads_failed,
     )
 
-    _print_summary(total, downloaded, skipped, failed, no_imvdb_link, no_videos, few_videos)
+    _print_summary(
+        total,
+        artists_skipped,
+        videos_downloaded,
+        video_downloads_failed,
+        no_imvdb_link,
+        no_videos,
+        few_videos,
+    )
 
 
 def _print_summary(
     total: int,
-    downloaded: int,
-    skipped: int,
-    failed: int,
+    artists_skipped: int,
+    videos_downloaded: int,
+    video_downloads_failed: int,
     no_imvdb_link: list[tuple[str, str]],
     no_videos: list[tuple[str, str]],
     few_videos: list[tuple[str, str, int]],
@@ -133,7 +141,11 @@ def _print_summary(
     print()
     print("=" * 50)
     print(f"  lfmv run complete - {total} artists processed")
-    print(f"  {downloaded} downloaded  |  {skipped} skipped  |  {failed} failed")
+    print(f"  {artists_skipped} artists skipped")
+    print(
+        f"  {videos_downloaded} videos downloaded  |  "
+        f"{video_downloads_failed} video downloads failed"
+    )
     print("=" * 50)
 
     if no_imvdb_link:
