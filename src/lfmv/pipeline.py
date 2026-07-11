@@ -150,24 +150,21 @@ def _print_summary(
 
     if no_imvdb_link:
         print()
-        print("No IMVDb page found - add to MusicBrainz:")
+        print("Missing IMVDb link in MusicBrainz:")
         for name, mbid in no_imvdb_link:
-            print(f"  https://musicbrainz.org/artist/{mbid}/edit")
-            print(f"    {name}")
+            print(f"  {name}: https://musicbrainz.org/artist/{mbid}")
 
     if no_videos:
         print()
         print("Zero music videos - add to IMVDb:")
         for name, slug in no_videos:
-            print(f"  https://imvdb.com/n/{slug}")
-            print(f"    {name}")
+            print(f"  {name}: https://imvdb.com/n/{slug}")
 
     if few_videos:
         print()
         print("Fewer than 5 music videos - add more to IMVDb:")
         for name, slug, count in few_videos:
-            print(f"  https://imvdb.com/n/{slug}  ({count} videos)")
-            print(f"    {name}")
+            print(f"  {name} ({count} videos): https://imvdb.com/n/{slug}")
 
     if not no_imvdb_link and not no_videos and not few_videos:
         print()

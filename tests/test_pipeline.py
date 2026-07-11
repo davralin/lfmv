@@ -54,6 +54,34 @@ def _make_config(
 
 
 # ---------------------------------------------------------------------------
+# Summary output
+# ---------------------------------------------------------------------------
+
+
+def test_print_summary_uses_readable_metadata_links(capsys):
+    """Metadata contribution links include artist names and avoid direct edit URLs."""
+    pipeline._print_summary(
+        total=3,
+        artists_skipped=2,
+        videos_downloaded=1,
+        video_downloads_failed=0,
+        no_imvdb_link=[("Switch Angel", "add1511e-cac6-4548-9f53-930183cb3eaf")],
+        no_videos=[("Alizee", "alizee")],
+        few_videos=[("My Dying Bride", "my-dying-bride", 2)],
+    )
+
+    output = capsys.readouterr().out
+
+    assert "Missing IMVDb link in MusicBrainz:" in output
+    assert (
+        "Switch Angel: https://musicbrainz.org/artist/add1511e-cac6-4548-9f53-930183cb3eaf"
+    ) in output
+    assert "Alizee: https://imvdb.com/n/alizee" in output
+    assert "My Dying Bride (2 videos): https://imvdb.com/n/my-dying-bride" in output
+    assert "/edit" not in output
+
+
+# ---------------------------------------------------------------------------
 # Stage 1: Lidarr
 # ---------------------------------------------------------------------------
 
