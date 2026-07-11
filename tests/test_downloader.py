@@ -114,3 +114,63 @@ class TestDownloadVideo:
             )
             result = download_video("https://youtu.be/x", "OK Go", cfg)
         assert result is False
+
+    def test_success_removes_sidecars_and_keeps_mkv(self, tmp_path):
+        cfg = _make_config(tmp_path)
+        video_dir = tmp_path / "OK Go" / "Song"
+        video_dir.mkdir(parents=True)
+        for name in [
+            "Song.mkv",
+            "Song.jpg",
+            "Song.webp",
+            "Song.mp4",
+            "Song.f399.mp4",
+            "Song.f140.m4a",
+            "Other Song.mp4",
+            ".yt-dlp-archive",
+        ]:
+            (video_dir / name).write_text("x")
+
+        with patch("yt_dlp.YoutubeDL") as MockYdl:
+            MockYdl.return_value.__enter__.return_value.download.return_value = 0
+            result = download_video("https://youtu.be/x", "OK Go", cfg, title="Song")
+
+        assert result is True
+        assert (video_dir / "Song.mkv").exists()
+        assert (video_dir / "Other Song.mp4").exists()
+        assert (video_dir / ".yt-dlp-archive").exists()
+        assert not (video_dir / "Song.jpg").exists()
+        assert not (video_dir / "Song.webp").exists()
+        assert not (video_dir / "Song.mp4").exists()
+        assert not (video_dir / "Song.f399.mp4").exists()
+        assert not (video_dir / "Song.f140.m4a").exists()
+
+    def test_failure_removes_partial_mkv_and_intermediates(self, tmp_path):
+        cfg = _make_config(tmp_path)
+        video_dir = tmp_path / "OK Go" / "Song"
+        video_dir.mkdir(parents=True)
+        for name in [
+            "Song.mkv",
+            "Song.jpg",
+            "Song.webp",
+            "Song.mp4",
+            "Song.f399.mp4",
+            "Song.f140.m4a",
+            "Other Song.mkv",
+            ".yt-dlp-archive",
+        ]:
+            (video_dir / name).write_text("x")
+
+        with patch("yt_dlp.YoutubeDL") as MockYdl:
+            MockYdl.return_value.__enter__.return_value.download.return_value = 1
+            result = download_video("https://youtu.be/x", "OK Go", cfg, title="Song")
+
+        assert result is False
+        assert (video_dir / "Other Song.mkv").exists()
+        assert (video_dir / ".yt-dlp-archive").exists()
+        assert not (video_dir / "Song.mkv").exists()
+        assert not (video_dir / "Song.jpg").exists()
+        assert not (video_dir / "Song.webp").exists()
+        assert not (video_dir / "Song.mp4").exists()
+        assert not (video_dir / "Song.f399.mp4").exists()
+        assert not (video_dir / "Song.f140.m4a").exists()

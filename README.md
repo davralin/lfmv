@@ -103,7 +103,7 @@ All configuration is via environment variables.
 | `LIDARR_URL` | `http://localhost:8686` | Lidarr base URL |
 | `LIDARR_API_KEY` | **required** | Lidarr API key |
 | `IMVDB_API_KEY` | **required** | IMVDb API key |
-| `OUTPUT_DIR` | `/music-videos` | Base directory for downloaded videos |
+| `OUTPUT_DIR` | `/music-videos` | Application-owned base directory for downloaded videos. Do not point at a mixed existing library. |
 | `OUTPUT_TEMPLATE` | `%(title)s/%(title)s` | yt-dlp output template, relative to artist directory. Must not be absolute or contain `..`. Full path: `{OUTPUT_DIR}/{artist}/{OUTPUT_TEMPLATE}.%(ext)s` |
 | `YTDLP_FORMAT` | *(yt-dlp default)* | yt-dlp format selector (e.g. `bestvideo+bestaudio/best`) |
 | `MUSICBRAINZ_URL` | `https://musicbrainz.org` | MusicBrainz mirror URL |
@@ -127,6 +127,8 @@ All configuration is via environment variables.
 ```
 
 Video metadata (info.json) and thumbnails are embedded inside the `.mkv` container as attachments. This layout is compatible with Jellyfin's Music Videos library type.
+
+`lfmv` expects `OUTPUT_DIR` to be an application-owned directory. Final videos are written as `.mkv` files, with per-artist `.yt-dlp-archive` files kept for deduplication. yt-dlp may create thumbnail sidecars or stream fragments while downloading; `lfmv` cleans these up after each attempted download. Do not point `OUTPUT_DIR` at a mixed library containing unrelated existing media or hand-managed files.
 
 ## Development
 

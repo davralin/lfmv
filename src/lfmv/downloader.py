@@ -15,11 +15,35 @@ log = structlog.get_logger(__name__)
 # Characters that are unsafe in directory / file names on common filesystems.
 # We sanitize path segments we provide; yt-dlp handles any placeholders left in the template.
 _UNSAFE_CHARS = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
+_ALWAYS_CLEAN_EXTENSIONS = (".jpg", ".jpeg", ".webp", ".png", ".mp4", ".webm", ".m4a", ".opus")
+_FAILURE_CLEAN_EXTENSIONS = (".mkv", ".part", ".ytdl")
+_FRAGMENT_PATTERNS = (".f*.mp4", ".f*.webm", ".f*.m4a", ".f*.opus")
 
 
 def _sanitize(name: str) -> str:
     """Replace filesystem-unsafe characters with an underscore."""
     return _UNSAFE_CHARS.sub("_", name).strip()
+
+
+def _cleanup_artifacts(output_base: Path, *, failed: bool) -> None:
+    """Remove yt-dlp sidecars/intermediates for one attempted output."""
+    candidates = [output_base.with_suffix(ext) for ext in _ALWAYS_CLEAN_EXTENSIONS]
+    if failed:
+        candidates.extend(output_base.with_suffix(ext) for ext in _FAILURE_CLEAN_EXTENSIONS)
+
+    candidates.extend(
+        path
+        for pattern in _FRAGMENT_PATTERNS
+        for path in output_base.parent.glob(f"{output_base.name}{pattern}")
+    )
+
+    for path in candidates:
+        if path.exists() and path.is_file():
+            try:
+                path.unlink()
+                log.info("download_artifact_removed", path=str(path), failed=failed)
+            except OSError as exc:
+                log.warning("download_artifact_cleanup_failed", path=str(path), error=str(exc))
 
 
 def download_video(
@@ -47,9 +71,10 @@ def download_video(
     if title:
         safe_title = _sanitize(title) or "Unknown Title"
         relative_template = config.output_template.replace("%(title)s", safe_title)
-        outtmpl = str(artist_dir / relative_template) + ".%(ext)s"
     else:
-        outtmpl = str(artist_dir / config.output_template) + ".%(ext)s"
+        relative_template = config.output_template
+    output_base = artist_dir / relative_template
+    outtmpl = str(output_base) + ".%(ext)s"
 
     if dry_run:
         log.info("dry_run_skip_download", url=url, artist=artist_name, outtmpl=outtmpl)
@@ -92,11 +117,15 @@ def download_video(
         # yt-dlp returns 0 on success (including archive-skipped)
         if ret != 0:
             log.error("ytdlp_nonzero_return", url=url, artist=artist_name, ret=ret)
+            _cleanup_artifacts(output_base, failed=True)
             return False
+        _cleanup_artifacts(output_base, failed=False)
         return True
     except yt_dlp.utils.DownloadError as exc:
         log.error("ytdlp_download_error", url=url, artist=artist_name, error=str(exc))
+        _cleanup_artifacts(output_base, failed=True)
         return False
     except Exception as exc:
         log.exception("ytdlp_unexpected_error", url=url, artist=artist_name, error=str(exc))
+        _cleanup_artifacts(output_base, failed=True)
         return False
