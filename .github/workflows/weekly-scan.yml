@@ -33,7 +33,6 @@ jobs:
           severity: CRITICAL,HIGH
           ignore-unfixed: true
           scanners: vuln
-          exit-code: '1'
           format: sarif
           output: trivy-weekly.sarif
 

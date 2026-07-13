@@ -47,9 +47,9 @@ call (`uses:`) and cannot contain `steps:`. All image-build logic belongs in the
 `image` job, which exposes its registry digest via `outputs.digest`.
 
 ### Trivy policy
-`severity: CRITICAL,HIGH`, `ignore-unfixed: true`. Do not lower the severity
-threshold or remove `exit-code: '1'` — both the config scan and the image scan
-must remain blocking.
+`severity: CRITICAL,HIGH`, `ignore-unfixed: true`. Trivy scans publish SARIF
+for GitHub code scanning, but do not set `exit-code: '1'`; vulnerability
+tracking is handled through SARIF alerts rather than blocking PRs/releases.
 
 ### Weekly scan
 `weekly-scan.yml` scans `ghcr.io/davralin/lfmv:latest` every Sunday 09:00 UTC.

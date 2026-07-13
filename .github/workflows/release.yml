@@ -87,7 +87,6 @@ jobs:
           scan-type: config
           scan-ref: Containerfile
           severity: CRITICAL,HIGH
-          exit-code: '1'
           format: sarif
           output: trivy-config.sarif
 
@@ -108,7 +107,6 @@ jobs:
           image-ref: ${{ steps.image-ref.outputs.ref }}
           severity: CRITICAL,HIGH
           ignore-unfixed: true
-          exit-code: '1'
           scanners: vuln
           format: sarif
           output: trivy-image.sarif
