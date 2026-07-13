@@ -27,7 +27,8 @@ Two workflows build container images with different attestation levels:
 - **`release.yml`** — triggered on schedule (Monday 09:00 UTC) or
   `workflow_dispatch`. Builds attested images with full SLSA L3 provenance +
   SBOM, tagged with the CalVer date (`YYYY.MM.DD`) and `:latest`. Pushes the
-  CalVer git tag only after all steps succeed.
+  CalVer git tag and creates the GitHub Release only after image build,
+  blocking scans, and provenance generation succeed.
 
 ### slsa-github-generator — tag pin exception
 `slsa-framework/slsa-github-generator` **must** be pinned by version tag, not SHA:

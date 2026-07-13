@@ -138,7 +138,7 @@ jobs:
     secrets:
       registry-password: ${{ secrets.GITHUB_TOKEN }}
 
-  tag:
+  release:
     needs: [provenance, image]
     if: needs.image.outputs.digest != ''
     runs-on: ubuntu-latest
@@ -150,3 +150,41 @@ jobs:
         run: |
           git tag "${{ needs.image.outputs.calver_tag }}"
           git push origin "${{ needs.image.outputs.calver_tag }}"
+      - name: Generate changelog
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/releases/generate-notes" \
+            -f tag_name="${{ needs.image.outputs.calver_tag }}" \
+            -f target_commitish="$GITHUB_SHA" \
+            --jq .body > "$RUNNER_TEMP/generated-notes.md"
+      - name: Write release notes
+        run: |
+          cat > "$RUNNER_TEMP/release-notes.md" <<'EOF'
+          ## Image
+
+          - Image: `ghcr.io/${{ github.repository }}:${{ needs.image.outputs.calver_tag }}`
+          - Digest: `ghcr.io/${{ github.repository }}@${{ needs.image.outputs.digest }}`
+          - Latest: `ghcr.io/${{ github.repository }}:latest`
+
+          SBOM, build provenance, and SLSA provenance are published with the container image.
+
+          ## Verification
+
+          ```sh
+          slsa-verifier verify-image ghcr.io/${{ github.repository }}:${{ needs.image.outputs.calver_tag }} \
+            --source-uri github.com/${{ github.repository }} \
+            --source-tag ${{ needs.image.outputs.calver_tag }}
+          ```
+
+          ## Changes
+          EOF
+          cat "$RUNNER_TEMP/generated-notes.md" >> "$RUNNER_TEMP/release-notes.md"
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ needs.image.outputs.calver_tag }}" \
+            --title "${{ needs.image.outputs.calver_tag }}" \
+            --notes-file "$RUNNER_TEMP/release-notes.md" \
+            --latest
