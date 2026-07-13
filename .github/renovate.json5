@@ -1,0 +1,133 @@
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+
+  extends: [
+    'config:recommended',
+    'docker:pinDigests',
+    'docker:enableMajor',
+    ':automergeBranch',
+  ],
+
+  dependencyDashboard: true,
+  dependencyDashboardTitle: 'Renovate Dashboard',
+  rebaseWhen: 'conflicted',
+
+  lockFileMaintenance: {
+    enabled: true,
+  },
+
+  packageRules: [
+    {
+      description: 'Automerge trusted container digest updates',
+      matchDatasources: ['docker'],
+      matchPackageNames: [
+        'denoland/deno',
+        'python',
+        'ghcr.io/astral-sh/uv',
+        'ghcr.io/home-operations/lidarr',
+      ],
+      matchUpdateTypes: ['digest'],
+      automerge: true,
+      automergeType: 'branch',
+      commitMessagePrefix: 'chore(container): ',
+      commitMessageExtra: '({{currentDigestShort}} -> {{newDigestShort}})',
+    },
+    {
+      description: 'Automerge trusted container patch updates',
+      matchDatasources: ['docker'],
+      matchPackageNames: [
+        'denoland/deno',
+        'python',
+        'ghcr.io/astral-sh/uv',
+        'ghcr.io/home-operations/lidarr',
+      ],
+      matchUpdateTypes: ['patch'],
+      automerge: true,
+      automergeType: 'branch',
+    },
+    {
+      description: 'Container major updates',
+      matchDatasources: ['docker'],
+      matchUpdateTypes: ['major'],
+      commitMessagePrefix: 'feat(container)!: ',
+    },
+    {
+      description: 'Container minor updates',
+      matchDatasources: ['docker'],
+      matchUpdateTypes: ['minor'],
+      commitMessagePrefix: 'feat(container): ',
+    },
+    {
+      description: 'Container patch updates',
+      matchDatasources: ['docker'],
+      matchUpdateTypes: ['patch'],
+      commitMessagePrefix: 'fix(container): ',
+    },
+    {
+      description: 'Container digest updates',
+      matchDatasources: ['docker'],
+      matchUpdateTypes: ['digest'],
+      commitMessagePrefix: 'chore(container): ',
+      commitMessageExtra: '({{currentDigestShort}} -> {{newDigestShort}})',
+    },
+    {
+      description: 'GitHub Actions major updates',
+      matchManagers: ['github-actions'],
+      matchUpdateTypes: ['major'],
+      commitMessagePrefix: 'feat(github-action)!: ',
+    },
+    {
+      description: 'GitHub Actions minor updates',
+      matchManagers: ['github-actions'],
+      matchUpdateTypes: ['minor'],
+      commitMessagePrefix: 'feat(github-action): ',
+    },
+    {
+      description: 'GitHub Actions patch updates',
+      matchManagers: ['github-actions'],
+      matchUpdateTypes: ['patch'],
+      commitMessagePrefix: 'fix(github-action): ',
+    },
+    {
+      description: 'GitHub Actions digest updates',
+      matchManagers: ['github-actions'],
+      matchUpdateTypes: ['digest'],
+      commitMessagePrefix: 'chore(github-action): ',
+    },
+    {
+      description: 'GitHub release major updates',
+      matchDatasources: ['github-releases'],
+      matchUpdateTypes: ['major'],
+      commitMessagePrefix: 'feat(github-release)!: ',
+    },
+    {
+      description: 'GitHub release minor updates',
+      matchDatasources: ['github-releases'],
+      matchUpdateTypes: ['minor'],
+      commitMessagePrefix: 'feat(github-release): ',
+    },
+    {
+      description: 'GitHub release patch updates',
+      matchDatasources: ['github-releases'],
+      matchUpdateTypes: ['patch'],
+      commitMessagePrefix: 'fix(github-release): ',
+    },
+    {
+      description: 'Runtime Python dependency updates',
+      matchManagers: ['pep621', 'uv'],
+      matchDepTypes: ['dependencies', 'project.dependencies'],
+      commitMessagePrefix: 'fix(deps): ',
+    },
+    {
+      description: 'Development Python dependency updates',
+      matchManagers: ['pep621', 'uv'],
+      matchDepTypes: ['dependency-groups', 'dev-dependencies', 'project.optional-dependencies'],
+      commitMessagePrefix: 'chore(dev-deps): ',
+    },
+    {
+      description: 'pre-commit hook updates',
+      matchManagers: ['pre-commit'],
+      commitMessagePrefix: 'chore(pre-commit): ',
+    },
+  ],
+}
