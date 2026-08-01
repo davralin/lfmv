@@ -5,20 +5,32 @@
     'config:recommended',
     'docker:pinDigests',
     'docker:enableMajor',
-    ':automergeBranch',
+    'helpers:pinGitHubActionDigests',
   ],
 
   dependencyDashboard: true,
   dependencyDashboardTitle: 'Renovate Dashboard',
   rebaseWhen: 'conflicted',
+  automergeStrategy: 'pr',
 
   lockFileMaintenance: {
     enabled: true,
     automerge: true,
-    automergeType: 'branch',
+    automergeType: 'pr',
   },
 
   packageRules: [
+    {
+      description: 'Auto-merge non-breaking updates',
+      matchUpdateTypes: ['digest', 'pinDigest', 'patch', 'minor'],
+      automerge: true,
+      automergeType: 'pr',
+    },
+    {
+      description: 'Major updates require review',
+      matchUpdateTypes: ['major'],
+      automerge: false,
+    },
     {
       description: 'Automerge trusted container digest updates',
       matchDatasources: ['docker'],
@@ -31,7 +43,7 @@
       ],
       matchUpdateTypes: ['digest', 'pinDigest'],
       automerge: true,
-      automergeType: 'branch',
+      automergeType: 'pr',
       commitMessagePrefix: 'chore(container): ',
       commitMessageExtra: '({{currentDigestShort}} -> {{newDigestShort}})',
     },
@@ -47,7 +59,13 @@
       ],
       matchUpdateTypes: ['patch'],
       automerge: true,
-      automergeType: 'branch',
+      automergeType: 'pr',
+    },
+    {
+      description: 'SLSA generator must stay tag-pinned for verifier-compatible OIDC claims',
+      matchManagers: ['github-actions'],
+      matchPackageNames: ['slsa-framework/slsa-github-generator'],
+      pinDigests: false,
     },
     {
       description: 'Container major updates',

@@ -92,6 +92,7 @@ jobs:
           scan-type: config
           scan-ref: Containerfile
           severity: CRITICAL,HIGH
+          # Soft mode: omit exit-code. Hard mode: add exit-code: '1'.
           format: sarif
           output: trivy-config.sarif
 
@@ -112,6 +113,7 @@ jobs:
           severity: CRITICAL,HIGH
           ignore-unfixed: true
           scanners: vuln
+          # Soft mode: omit exit-code. Hard mode: add exit-code: '1'.
           format: sarif
           output: trivy-image.sarif
 
