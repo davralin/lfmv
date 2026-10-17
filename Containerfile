@@ -14,7 +14,7 @@ RUN apt-get update \
     && useradd --system --uid 1000 --no-create-home lfmv
 
 # Install uv from the official image
-COPY --from=ghcr.io/astral-sh/uv:0.12.13@sha256:b485bd65cc2cf1c9a93b3554012c9c3778cf7b1b5fd3d3096ce9e1226c97e1e6 /uv /usr/local/bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.13.1@sha256:4a1f3666816dafadd20ceb71eac9a7d56d7ef30279f7d64048519ab901ada336 /uv /usr/local/bin/uv
 
 # Install deno JS runtime (required by yt-dlp for YouTube extraction)
 COPY --from=deno /deno /usr/local/bin/deno
